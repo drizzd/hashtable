@@ -23,17 +23,27 @@ static struct item *item_new(const char *key, void *value)
 	return x;
 }
 
+static int find_empty_pos(const char *key)
+{
+	int pos0, n;
+
+	pos0 = hash(key) % HASHTABLE_SIZE;
+	for (n = 0; n < HASHTABLE_SIZE; n++) {
+		int pos = pos0 + n % HASHTABLE_SIZE;
+		if (hashtable_test_pos(key, pos))
+			return pos;
+	}
+
+	return -1;
+}
+
 int hashtable_set(const char *key, void *value)
 {
-	unsigned i, n;
+	int pos;
 	struct item *x;
 
-	i = hash(key) % HASHTABLE_SIZE;
-	for (n = 0; n < HASHTABLE_SIZE; n++)
-		if (hashtable_test_pos(key, i + n % HASHTABLE_SIZE))
-			break;
-
-	if (n == HASHTABLE_SIZE) {
+	pos = find_empty_pos(key);
+	if (pos < 0) {
 		/* hash table is full */
 		return 1;
 	}
@@ -41,7 +51,7 @@ int hashtable_set(const char *key, void *value)
 	x = item_new(key, value);
 	if (!x)
 		return -1;
-	hashtable[i+n] = x;
+	hashtable[pos] = x;
 
 	return 0;
 }
