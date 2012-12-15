@@ -45,3 +45,31 @@ int hashtable_set(const char *key, void *value)
 
 	return 0;
 }
+
+static int find_key_pos(const char *key)
+{
+	int i, n;
+
+	i = hash(key) % HASHTABLE_SIZE;
+	for (n = 0; n < HASHTABLE_SIZE; n++) {
+		int pos = i + n % HASHTABLE_SIZE;
+		if (!hashtable[pos])
+			return -1;
+		if (!strcmp(hashtable[pos]->key, key)) {
+			return pos;
+		}
+	}
+
+	return -1;
+}
+
+int hashtable_get(const char *key, void **value)
+{
+	int pos = find_key_pos(key);
+
+	if (pos < 0)
+		return 1;
+
+	*value = hashtable[pos]->value;
+	return 0;
+}

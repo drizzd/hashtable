@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <string.h>
 
-static int hashtable_test_key_at_pos(const char *key, int pos)
+int hashtable_test_key_at_pos(const char *key, int pos)
 {
 	return hashtable[pos] && !strcmp(hashtable[pos]->key, key);
 }
@@ -31,21 +31,45 @@ static int find_next_collision(int h, char *key, int n)
 	return 1;
 }
 
+void init_key(char *key, int n)
+{
+	int i;
+	for (i = 0; i < n; i++)
+		key[i] = 'a';
+}
+
+#define ARRAY_SIZE(x) sizeof(x)/sizeof(x[0])
+
 int main()
 {
-	char key[] = "aaaaaaaa";
+	char key[9];
 	int i;
 	int pos = 0;
 
+	init_key(key, ARRAY_SIZE(key));
 	for (i = 0; i < HASHTABLE_SIZE; i++) {
+		void *unchanged = NULL + 1234;
+		void *actual = unchanged;
+		void *value = NULL + i;
 		assert(!find_next_collision(pos, key, strlen(key)));
-		assert(!hashtable_set(key, NULL + i));
+		assert(hashtable_get(key, &actual) == 1);
+		assert(actual == unchanged);
+		assert(!hashtable_set(key, value));
 		assert(hashtable_test_key_at_pos(key, pos + i % HASHTABLE_SIZE));
 	}
 
 	assert(!find_next_collision(pos, key, strlen(key)));
 	/* table is full */
 	assert(hashtable_set(key, NULL) == 1);
+
+	init_key(key, ARRAY_SIZE(key));
+	for (i = 0; i < HASHTABLE_SIZE; i++) {
+		void *expect = NULL + i;
+		void *actual;
+		assert(!find_next_collision(pos, key, strlen(key)));
+		assert(!hashtable_get(key, &actual));
+		assert(actual == expect);
+	}
 
 	return 0;
 }
