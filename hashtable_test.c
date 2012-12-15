@@ -71,5 +71,16 @@ int main()
 		assert(actual == expect);
 	}
 
+	assert(hashtable_remove("asdf"));
+	assert(hashtable_remove(""));
+	init_key(key, ARRAY_SIZE(key));
+	for (i = 0; i < HASHTABLE_SIZE; i++) {
+		assert(!find_next_collision(pos, key, strlen(key)));
+		assert(!hashtable_remove(key));
+		assert(hashtable_remove(key));
+	}
+	init_key(key, ARRAY_SIZE(key));
+	assert(hashtable_remove(key));
+
 	return 0;
 }
